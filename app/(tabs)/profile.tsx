@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { LogOut, Flame, Target, TrendingUp, User } from 'lucide-react-native';
+import { LogOut, Flame, Target, TrendingUp, User, Sparkles, Lightbulb, ArrowRight } from 'lucide-react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProfileStore } from '@/store/useProfileStore';
 import { ProgressCircle } from '@/components/profile/ProgressCircle';
@@ -13,12 +13,13 @@ import { colors, borderRadius, spacing, typography, elevation } from '@/constant
 export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
   const logOut = useAuthStore((state) => state.logOut);
-  const { progress, loadProgress, meditativeMode, toggleMeditativeMode } = useProfileStore();
+  const { progress, analysis, loadProgress, loadAnalysis, meditativeMode, toggleMeditativeMode } = useProfileStore();
   const [showMeditativeTimer, setShowMeditativeTimer] = useState(false);
 
   useEffect(() => {
     if (user) {
       loadProgress(user.id);
+      loadAnalysis(user.id);
     }
   }, [user]);
 
@@ -38,6 +39,21 @@ export default function ProfileScreen() {
   const handleExitMeditative = () => {
     toggleMeditativeMode();
     setShowMeditativeTimer(false);
+  };
+
+  const getInsightColor = (type: string) => {
+    switch (type) {
+      case 'success':
+        return colors.gradients.forest;
+      case 'struggle':
+        return colors.gradients.sunset;
+      case 'pattern':
+        return colors.gradients.ocean;
+      case 'opportunity':
+        return colors.gradients.purple;
+      default:
+        return colors.gradients.ocean;
+    }
   };
 
   return (
@@ -125,6 +141,61 @@ export default function ProfileScreen() {
           </TouchableOpacity>
           <Text style={styles.progressHint}>Tap to enter meditative mode</Text>
         </Animated.View>
+
+        {analysis && (
+          <Animated.View entering={FadeIn.delay(600)} style={styles.insightsSection}>
+            <View style={styles.insightsHeader}>
+              <Sparkles size={24} color="#C471F5" strokeWidth={2} />
+              <Text style={styles.sectionTitle}>AI Insights</Text>
+            </View>
+
+            {analysis.celebrationMoments && analysis.celebrationMoments.length > 0 && (
+              <View style={styles.celebrationsContainer}>
+                <Text style={styles.subsectionTitle}>Celebrations</Text>
+                {analysis.celebrationMoments.map((moment, index) => (
+                  <View key={index} style={styles.celebrationItem}>
+                    <Flame size={16} color={colors.warning} strokeWidth={2} />
+                    <Text style={styles.celebrationText}>{moment}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {analysis.keyInsights && analysis.keyInsights.length > 0 && (
+              <View style={styles.insightsContainer}>
+                <Text style={styles.subsectionTitle}>Key Insights</Text>
+                {analysis.keyInsights.slice(0, 3).map((insight, index) => (
+                  <View key={index} style={styles.insightCard}>
+                    <LinearGradient
+                      colors={getInsightColor(insight.type)}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.insightGradient}
+                    >
+                      <View style={styles.insightHeader}>
+                        <Lightbulb size={18} color="#FFFFFF" strokeWidth={2} />
+                        <Text style={styles.insightTitle}>{insight.title}</Text>
+                      </View>
+                      <Text style={styles.insightDescription}>{insight.description}</Text>
+                    </LinearGradient>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {analysis.nextSteps && analysis.nextSteps.length > 0 && (
+              <View style={styles.nextStepsContainer}>
+                <Text style={styles.subsectionTitle}>Recommended Next Steps</Text>
+                {analysis.nextSteps.map((step, index) => (
+                  <View key={index} style={styles.nextStepItem}>
+                    <ArrowRight size={16} color="#C471F5" strokeWidth={2} />
+                    <Text style={styles.nextStepText}>{step}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </Animated.View>
+        )}
       </ScrollView>
 
       <Modal visible={showMeditativeTimer} animationType="fade" transparent={false}>
@@ -307,5 +378,91 @@ const styles = StyleSheet.create({
   },
   exitButton: {
     width: '100%',
+  },
+  insightsSection: {
+    backgroundColor: colors.cardGray,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    marginTop: spacing.base,
+    borderWidth: 1,
+    borderColor: colors.borderGray,
+  },
+  insightsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
+  },
+  subsectionTitle: {
+    fontSize: typography.fontSizes.md,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+    marginTop: spacing.base,
+  },
+  celebrationsContainer: {
+    marginBottom: spacing.md,
+  },
+  celebrationItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.darkGray,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+  },
+  celebrationText: {
+    flex: 1,
+    fontSize: typography.fontSizes.sm,
+    color: colors.textPrimary,
+    lineHeight: 20,
+  },
+  insightsContainer: {
+    marginBottom: spacing.md,
+  },
+  insightCard: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    marginBottom: spacing.sm,
+    ...elevation.small,
+  },
+  insightGradient: {
+    padding: spacing.md,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  insightTitle: {
+    fontSize: typography.fontSizes.sm,
+    fontWeight: typography.fontWeights.bold,
+    color: '#FFFFFF',
+    flex: 1,
+  },
+  insightDescription: {
+    fontSize: typography.fontSizes.xs,
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 18,
+  },
+  nextStepsContainer: {
+    marginTop: spacing.sm,
+  },
+  nextStepItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.darkGray,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+  },
+  nextStepText: {
+    flex: 1,
+    fontSize: typography.fontSizes.sm,
+    color: colors.textPrimary,
+    lineHeight: 20,
   },
 });

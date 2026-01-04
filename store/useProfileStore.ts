@@ -1,13 +1,16 @@
 import { create } from 'zustand';
 import { supabase } from '@/services/supabaseConfig';
-import type { UserProgress } from '@/types';
+import type { UserProgress, BehaviorAnalysis } from '@/types';
+import { getLatestAnalysis } from '@/services/behaviorAnalysisService';
 
 interface ProfileState {
   progress: UserProgress | null;
+  analysis: BehaviorAnalysis | null;
   loading: boolean;
   error: string | null;
   meditativeMode: boolean;
   loadProgress: (userId: string) => Promise<void>;
+  loadAnalysis: (userId: string) => Promise<void>;
   updateProgress: (userId: string, data: Partial<UserProgress>) => Promise<void>;
   calculateProgress: (userId: string, habits: any[]) => Promise<void>;
   toggleMeditativeMode: () => void;
@@ -15,9 +18,19 @@ interface ProfileState {
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
   progress: null,
+  analysis: null,
   loading: false,
   error: null,
   meditativeMode: false,
+
+  loadAnalysis: async (userId: string) => {
+    try {
+      const analysis = await getLatestAnalysis(userId);
+      set({ analysis });
+    } catch (error: any) {
+      console.error('Failed to load behavior analysis:', error);
+    }
+  },
 
   loadProgress: async (userId: string) => {
     try {
