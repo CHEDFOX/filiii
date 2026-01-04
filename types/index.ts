@@ -119,3 +119,52 @@ export interface PsychologyQuestions {
   successDefinition: string;
   persistenceStory: string;
 }
+
+export interface BehaviorAnalysis {
+  keyInsights: Array<{
+    type: 'success' | 'struggle' | 'pattern' | 'opportunity';
+    title: string;
+    description: string;
+    confidence: 'high' | 'medium' | 'low';
+  }>;
+  habitRecommendations: Array<{
+    habitId: string | null;
+    action: 'continue' | 'adjust' | 'pause' | 'remove' | 'add';
+    reasoning: string;
+    suggestedChanges?: {
+      frequency?: string;
+      duration?: number;
+      timeOfDay?: string;
+    };
+  }>;
+  motivationalThemes: string[];
+  riskFactors: Array<{
+    factor: 'burnout' | 'consistency-drop' | 'overcommitment' | 'avoidance';
+    severity: 'low' | 'medium' | 'high';
+    evidence: string;
+  }>;
+  nextSteps: string[];
+  celebrationMoments: string[];
+  analyzedAt: Date;
+}
+
+export interface UserActivityData {
+  habits: Array<{
+    id: string;
+    name: string;
+    category: string;
+    completionRate: number;
+    totalCompletions: number;
+    currentStreak: number;
+    longestStreak: number;
+    lastCompleted?: Date;
+    averageCompletionTime?: string;
+  }>;
+  recentChatThemes: string[];
+  timeframe: {
+    startDate: Date;
+    endDate: Date;
+    daysTracked: number;
+  };
+  psychologyProfile?: PsychologyProfile;
+}

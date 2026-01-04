@@ -3,6 +3,7 @@ import {
   HABIT_REFINEMENT_PROMPT,
   CHAT_SYSTEM_PROMPT,
   PSYCHOLOGY_ANALYSIS_PROMPT,
+  BEHAVIOR_ANALYSIS_PROMPT,
   generateAdaptiveSystemPrompt,
   OPENROUTER_CONFIG,
 } from '@/constants/aiPrompts';
@@ -12,6 +13,8 @@ import type {
   OnboardingAnswers,
   PsychologyProfile,
   PsychologyQuestions,
+  BehaviorAnalysis,
+  UserActivityData,
 } from '@/types';
 
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY;
@@ -129,6 +132,62 @@ Analyze these responses and extract a deep psychological profile.
   }
 }
 
+export async function analyzeBehaviorPatterns(
+  activityData: UserActivityData
+): Promise<BehaviorAnalysis> {
+  const userMessage = `
+TIMEFRAME: ${activityData.timeframe.daysTracked} days of data
+
+HABIT PERFORMANCE:
+${activityData.habits
+  .map(
+    (h) => `
+- ${h.name} (${h.category})
+  Completion Rate: ${(h.completionRate * 100).toFixed(1)}%
+  Total Completions: ${h.totalCompletions}
+  Current Streak: ${h.currentStreak} days
+  Longest Streak: ${h.longestStreak} days
+  Last Completed: ${h.lastCompleted ? new Date(h.lastCompleted).toLocaleDateString() : 'Never'}
+  ${h.averageCompletionTime ? `Typical Time: ${h.averageCompletionTime}` : ''}`
+  )
+  .join('\n')}
+
+RECENT CONVERSATION THEMES:
+${activityData.recentChatThemes.length > 0 ? activityData.recentChatThemes.join(', ') : 'No recent conversations'}
+
+${
+  activityData.psychologyProfile
+    ? `
+USER'S PSYCHOLOGY PROFILE:
+- Self-Talk: ${activityData.psychologyProfile.selfTalkPattern}
+- Core Values: ${activityData.psychologyProfile.coreValues.join(', ')}
+- Potential Barriers: ${activityData.psychologyProfile.potentialBarriers.join(', ')}
+- Burnout Risk: ${activityData.psychologyProfile.burnoutRisk}
+- Perfectionism: ${activityData.psychologyProfile.perfectionism}
+`
+    : ''
+}
+
+Analyze this user's behavior and provide personalized insights and recommendations.
+  `;
+
+  const response = await callOpenRouter([
+    { role: 'system', content: BEHAVIOR_ANALYSIS_PROMPT },
+    { role: 'user', content: userMessage },
+  ]);
+
+  try {
+    const parsed = JSON.parse(response);
+    return {
+      ...parsed,
+      analyzedAt: new Date(),
+    } as BehaviorAnalysis;
+  } catch (error) {
+    console.error('Failed to parse behavior analysis:', error);
+    throw new Error('Invalid behavior analysis format');
+  }
+}
+
 export async function chatWithCoach(
   userMessage: string,
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
@@ -136,6 +195,7 @@ export async function chatWithCoach(
     activeHabits?: number;
     completedToday?: number;
     currentStreak?: number;
+    recentInsights?: string[];
   },
   psychologyProfile?: PsychologyProfile
 ): Promise<string> {
@@ -143,7 +203,8 @@ export async function chatWithCoach(
     ? `\n\nUser Context:
 - Active Habits: ${userContext.activeHabits || 0}
 - Completed Today: ${userContext.completedToday || 0}
-- Current Streak: ${userContext.currentStreak || 0} days`
+- Current Streak: ${userContext.currentStreak || 0} days
+${userContext.recentInsights && userContext.recentInsights.length > 0 ? `\nRecent Behavioral Insights:\n${userContext.recentInsights.map((i) => `- ${i}`).join('\n')}` : ''}`
     : '';
 
   const systemPrompt = psychologyProfile

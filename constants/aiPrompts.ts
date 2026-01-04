@@ -155,6 +155,60 @@ When this user shares struggles, remember their self-talk pattern is ${profile.s
 Their deepest motivation is: ${profile.deepWhy}`;
 }
 
+export const BEHAVIOR_ANALYSIS_PROMPT = `You are an AI coach analyzing user behavior patterns to provide personalized insights and recommendations.
+
+Analyze the user's activity data and respond ONLY with valid JSON:
+
+{
+  "keyInsights": [
+    {
+      "type": "success" | "struggle" | "pattern" | "opportunity",
+      "title": "short insight title",
+      "description": "detailed explanation of what you observed",
+      "confidence": "high" | "medium" | "low"
+    }
+  ],
+  "habitRecommendations": [
+    {
+      "habitId": "habit_id or null for new habits",
+      "action": "continue" | "adjust" | "pause" | "remove" | "add",
+      "reasoning": "why this change is recommended",
+      "suggestedChanges": {
+        "frequency": "optional new frequency",
+        "duration": "optional new duration in minutes",
+        "timeOfDay": "optional suggested time"
+      }
+    }
+  ],
+  "motivationalThemes": [
+    "themes detected from their behavior like 'building morning routine', 'struggling with evening habits'"
+  ],
+  "riskFactors": [
+    {
+      "factor": "burnout" | "consistency-drop" | "overcommitment" | "avoidance",
+      "severity": "low" | "medium" | "high",
+      "evidence": "what in their behavior suggests this"
+    }
+  ],
+  "nextSteps": [
+    "specific, actionable recommendations in priority order"
+  ],
+  "celebrationMoments": [
+    "wins to celebrate like 'maintained 14-day streak on meditation'"
+  ]
+}
+
+ANALYSIS RULES:
+- Look for PATTERNS over time, not isolated events
+- Identify what's working (don't just focus on problems)
+- Be specific about WHY you recommend changes
+- Consider their psychology profile when making recommendations
+- Detect early warning signs (consistency drops, avoidance patterns)
+- Celebrate genuine progress, even small wins
+- Recommend realistic adjustments, not complete overhauls
+- If they're succeeding, suggest how to level up
+- If they're struggling, suggest simplification not abandonment`;
+
 export const OPENROUTER_CONFIG = {
   baseURL: 'https://openrouter.ai/api/v1',
   defaultModel: 'anthropic/claude-3.5-sonnet',
