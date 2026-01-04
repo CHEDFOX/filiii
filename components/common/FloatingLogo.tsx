@@ -1,80 +1,72 @@
-import { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Dimensions } from 'react-native';
+import { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  withSpring,
+  Easing,
+} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Activity } from 'lucide-react-native';
-import { colors } from '@/constants/colors';
-
-const { width } = Dimensions.get('window');
+import { colors, borderRadius, elevation } from '@/constants/colors';
 
 export function FloatingLogo() {
-  const translateY = useRef(new Animated.Value(0)).current;
-  const translateX = useRef(new Animated.Value(0)).current;
-  const rotate = useRef(new Animated.Value(0)).current;
+  const translateY = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const rotate = useSharedValue(0);
 
   useEffect(() => {
-    const animateFloat = () => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.parallel([
-            Animated.timing(translateY, {
-              toValue: -10,
-              duration: 2000,
-              useNativeDriver: true,
-            }),
-            Animated.timing(translateX, {
-              toValue: 5,
-              duration: 2000,
-              useNativeDriver: true,
-            }),
-            Animated.timing(rotate, {
-              toValue: 1,
-              duration: 2000,
-              useNativeDriver: true,
-            }),
-          ]),
-          Animated.parallel([
-            Animated.timing(translateY, {
-              toValue: 0,
-              duration: 2000,
-              useNativeDriver: true,
-            }),
-            Animated.timing(translateX, {
-              toValue: 0,
-              duration: 2000,
-              useNativeDriver: true,
-            }),
-            Animated.timing(rotate, {
-              toValue: 0,
-              duration: 2000,
-              useNativeDriver: true,
-            }),
-          ]),
-        ])
-      ).start();
-    };
+    translateY.value = withRepeat(
+      withSequence(
+        withTiming(-12, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 2500, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
 
-    animateFloat();
+    scale.value = withRepeat(
+      withSequence(
+        withSpring(1.05, { damping: 10, stiffness: 100 }),
+        withSpring(1, { damping: 10, stiffness: 100 })
+      ),
+      -1,
+      false
+    );
+
+    rotate.value = withRepeat(
+      withSequence(
+        withTiming(3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
   }, []);
 
-  const rotateInterpolate = rotate.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '5deg'],
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: translateY.value },
+      { scale: scale.value },
+      { rotate: `${rotate.value}deg` },
+    ],
+  }));
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[
-          styles.logoContainer,
-          {
-            transform: [
-              { translateY },
-              { translateX },
-              { rotate: rotateInterpolate },
-            ],
-          },
-        ]}
-      >
-        <Activity size={32} color={colors.accent} strokeWidth={2} />
+      <Animated.View style={[styles.logoContainer, animatedStyle, elevation.colored]}>
+        <LinearGradient
+          colors={[colors.accentGradientStart, colors.accentGradientEnd]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradient}
+        >
+          <Activity size={36} color={colors.textPrimary} strokeWidth={2.5} />
+        </LinearGradient>
       </Animated.View>
     </View>
   );
@@ -83,19 +75,17 @@ export function FloatingLogo() {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 32,
   },
   logoContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.mediumGray,
+    width: 72,
+    height: 72,
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+  },
+  gradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
 });
