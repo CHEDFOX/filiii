@@ -75,6 +75,86 @@ You help users with:
 
 Stay in character as a supportive coach who knows the user's journey.`;
 
+export const PSYCHOLOGY_ANALYSIS_PROMPT = `You are a psychology-informed AI coach analyzing user responses to create a deep personality profile.
+
+Analyze these 3 responses:
+1. Self-talk when not meeting expectations
+2. Definition of success and why it matters
+3. Time they persisted through difficulty
+
+Extract psychological patterns and respond ONLY with valid JSON:
+
+{
+  "selfTalkPattern": "self-compassionate|self-critical|analytical|balanced|achievement-driven",
+  "selfTalkIndicators": ["specific phrases that reveal pattern"],
+
+  "motivationSource": "intrinsic|extrinsic|purpose-driven|identity-driven",
+  "deepWhy": "the core reason they care (not surface level)",
+
+  "resilienceStyle": "self-accountability|purpose-anchored|community-driven|strategic|needs-support",
+  "pastSuccessFactors": ["what actually kept them going"],
+
+  "coachingTone": "gentle|direct|empowering|analytical|collaborative",
+  "accountabilityType": "self|community|external|progress-tracking",
+
+  "coreValues": ["2-3 deeply held values like 'family', 'integrity', 'growth'"],
+  "keyMotivators": ["specific motivators like 'being present for kids', 'proving capability'"],
+  "potentialBarriers": ["predicted obstacles like 'perfectionism', 'all-or-nothing thinking'"],
+  "strengthsToLeverage": ["existing strengths like 'analytical mind', 'determination'"],
+
+  "burnoutRisk": "low|medium|high",
+  "perfectionism": "low|medium|high",
+  "needsStructure": true|false,
+  "needsCommunity": true|false
+}
+
+ANALYSIS RULES:
+- Look for IMPLICIT patterns, not just explicit statements
+- Identify cognitive styles (growth vs fixed mindset)
+- Detect emotional regulation patterns
+- Note language patterns (absolute words, emotion intensity)
+- Identify values through "why it matters" reasoning
+- Predict what coaching style will resonate
+- NO generic analysis - be specific to their words`;
+
+export function generateAdaptiveSystemPrompt(profile: any): string {
+  const toneMap = {
+    gentle: 'Use warm, encouraging language. Avoid any harsh or direct feedback. Frame setbacks as learning opportunities.',
+    direct: 'Be straightforward and honest. This user values clarity over cushioning. Give direct feedback.',
+    empowering: 'Focus on their agency and capability. Use empowering language like "you have the power to" and "you\'re capable of".',
+    analytical: 'Provide logical reasoning and data. This user responds to systems thinking and strategic frameworks.',
+    collaborative: 'Position yourself as a thinking partner. Use "we" language and invite their input on solutions.'
+  };
+
+  const accountabilityMap = {
+    self: 'Encourage self-reflection and personal commitment tracking. Ask them what they\'re committing to.',
+    community: 'Suggest sharing goals with others. Mention accountability partners and community support.',
+    external: 'Provide structured check-ins and progress milestones. Act as their external accountability system.',
+    'progress-tracking': 'Focus on data, metrics, and visible progress. Celebrate measurable wins.'
+  };
+
+  return `${CHAT_SYSTEM_PROMPT}
+
+PERSONALIZED COACHING STYLE for this user:
+${toneMap[profile.coachingTone as keyof typeof toneMap]}
+
+ACCOUNTABILITY APPROACH:
+${accountabilityMap[profile.accountabilityType as keyof typeof accountabilityMap]}
+
+USER'S PSYCHOLOGY PROFILE:
+- Self-Talk Pattern: ${profile.selfTalkPattern}
+- Core Values: ${profile.coreValues.join(', ')}
+- Key Motivators: ${profile.keyMotivators.join(', ')}
+- Strengths: ${profile.strengthsToLeverage.join(', ')}
+- Watch Out For: ${profile.potentialBarriers.join(', ')}
+
+${profile.burnoutRisk === 'high' ? 'CRITICAL: This user shows burnout risk. Encourage rest, balance, and sustainable pace. Watch for overcommitment.' : ''}
+${profile.perfectionism === 'high' ? 'NOTE: High perfectionism detected. Normalize imperfection and celebrate "good enough". Counter all-or-nothing thinking.' : ''}
+
+When this user shares struggles, remember their self-talk pattern is ${profile.selfTalkPattern}. Adjust your response accordingly.
+Their deepest motivation is: ${profile.deepWhy}`;
+}
+
 export const OPENROUTER_CONFIG = {
   baseURL: 'https://openrouter.ai/api/v1',
   defaultModel: 'anthropic/claude-3.5-sonnet',

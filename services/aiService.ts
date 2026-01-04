@@ -2,9 +2,17 @@ import {
   ONBOARDING_SYSTEM_PROMPT,
   HABIT_REFINEMENT_PROMPT,
   CHAT_SYSTEM_PROMPT,
+  PSYCHOLOGY_ANALYSIS_PROMPT,
+  generateAdaptiveSystemPrompt,
   OPENROUTER_CONFIG,
 } from '@/constants/aiPrompts';
-import type { AIGoalResponse, AIHabitRefinement, OnboardingAnswers } from '@/types';
+import type {
+  AIGoalResponse,
+  AIHabitRefinement,
+  OnboardingAnswers,
+  PsychologyProfile,
+  PsychologyQuestions,
+} from '@/types';
 
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY;
 
@@ -89,6 +97,38 @@ export async function refineHabit(habitText: string): Promise<AIHabitRefinement>
   }
 }
 
+export async function analyzePsychology(
+  answers: PsychologyQuestions
+): Promise<PsychologyProfile> {
+  const userMessage = `
+User's Psychological Responses:
+
+1. When I don't meet my own expectations, I tell myself:
+"${answers.selfTalkResponse}"
+
+2. Success in my wellness journey looks like:
+"${answers.successDefinition}"
+
+3. A time I stuck with something difficult:
+"${answers.persistenceStory}"
+
+Analyze these responses and extract a deep psychological profile.
+  `;
+
+  const response = await callOpenRouter([
+    { role: 'system', content: PSYCHOLOGY_ANALYSIS_PROMPT },
+    { role: 'user', content: userMessage },
+  ]);
+
+  try {
+    const parsed = JSON.parse(response);
+    return parsed as PsychologyProfile;
+  } catch (error) {
+    console.error('Failed to parse psychology profile:', error);
+    throw new Error('Invalid psychology analysis format');
+  }
+}
+
 export async function chatWithCoach(
   userMessage: string,
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
@@ -96,7 +136,8 @@ export async function chatWithCoach(
     activeHabits?: number;
     completedToday?: number;
     currentStreak?: number;
-  }
+  },
+  psychologyProfile?: PsychologyProfile
 ): Promise<string> {
   const contextMessage = userContext
     ? `\n\nUser Context:
@@ -105,8 +146,12 @@ export async function chatWithCoach(
 - Current Streak: ${userContext.currentStreak || 0} days`
     : '';
 
+  const systemPrompt = psychologyProfile
+    ? generateAdaptiveSystemPrompt(psychologyProfile) + contextMessage
+    : CHAT_SYSTEM_PROMPT + contextMessage;
+
   const messages: OpenRouterMessage[] = [
-    { role: 'system', content: CHAT_SYSTEM_PROMPT + contextMessage },
+    { role: 'system', content: systemPrompt },
     ...conversationHistory.map(
       (msg) =>
         ({

@@ -94,3 +94,28 @@ export interface VoiceSettings {
   pitch: number;
   volume: number;
 }
+
+export interface PsychologyProfile {
+  selfTalkPattern: 'self-compassionate' | 'self-critical' | 'analytical' | 'balanced' | 'achievement-driven';
+  selfTalkIndicators: string[];
+  motivationSource: 'intrinsic' | 'extrinsic' | 'purpose-driven' | 'identity-driven';
+  deepWhy: string;
+  resilienceStyle: 'self-accountability' | 'purpose-anchored' | 'community-driven' | 'strategic' | 'needs-support';
+  pastSuccessFactors: string[];
+  coachingTone: 'gentle' | 'direct' | 'empowering' | 'analytical' | 'collaborative';
+  accountabilityType: 'self' | 'community' | 'external' | 'progress-tracking';
+  coreValues: string[];
+  keyMotivators: string[];
+  potentialBarriers: string[];
+  strengthsToLeverage: string[];
+  burnoutRisk: 'low' | 'medium' | 'high';
+  perfectionism: 'low' | 'medium' | 'high';
+  needsStructure: boolean;
+  needsCommunity: boolean;
+}
+
+export interface PsychologyQuestions {
+  selfTalkResponse: string;
+  successDefinition: string;
+  persistenceStory: string;
+}
