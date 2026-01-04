@@ -23,7 +23,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Plus, X, Sparkles } from 'lucide-react-native';
+import { Plus, X, Sparkles, Heart, Dumbbell, BookOpen, Coffee, Moon, Zap, Smile, Target } from 'lucide-react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useHabitsStore } from '@/store/useHabitsStore';
 import { useProfileStore } from '@/store/useProfileStore';
@@ -39,12 +39,22 @@ export default function HomeScreen() {
   const { calculateProgress } = useProfileStore();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newHabitText, setNewHabitText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
 
   const addButtonScale = useSharedValue(1);
 
   const today = new Date().toISOString().split('T')[0];
+
+  const categories = [
+    { id: 'wellness', name: 'Wellness', icon: Heart, colors: ['#FF6B9D', '#C06C84'] },
+    { id: 'fitness', name: 'Fitness', icon: Dumbbell, colors: ['#4FACFE', '#00F2FE'] },
+    { id: 'learning', name: 'Learning', icon: BookOpen, colors: ['#FA709A', '#FEE140'] },
+    { id: 'productivity', name: 'Work', icon: Target, colors: ['#A8EDEA', '#FED6E3'] },
+    { id: 'mindfulness', name: 'Mindful', icon: Smile, colors: ['#FFD89B', '#19547B'] },
+    { id: 'sleep', name: 'Sleep', icon: Moon, colors: ['#667EEA', '#764BA2'] },
+  ];
 
   useEffect(() => {
     if (user) {
@@ -67,6 +77,14 @@ export default function HomeScreen() {
       return;
     }
 
+    if (!selectedCategory) {
+      setError('Please select a category');
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+      return;
+    }
+
     try {
       setCreating(true);
       setError('');
@@ -81,7 +99,7 @@ export default function HomeScreen() {
         userId: user.id,
         name: refinedHabit.name,
         description: refinedHabit.description,
-        category: refinedHabit.category,
+        category: selectedCategory,
         duration: 15,
         frequency: 'daily',
         priority: 'medium',
@@ -95,6 +113,7 @@ export default function HomeScreen() {
 
       setShowCreateModal(false);
       setNewHabitText('');
+      setSelectedCategory('');
       setCreating(false);
     } catch (err: any) {
       setError(err.message || 'Failed to create habit');
@@ -125,6 +144,7 @@ export default function HomeScreen() {
     }
     setShowCreateModal(false);
     setNewHabitText('');
+    setSelectedCategory('');
     setError('');
   };
 
@@ -231,51 +251,103 @@ export default function HomeScreen() {
             >
               <View style={styles.modalHandle} />
 
-              <View style={styles.modalHeader}>
-                <View style={styles.modalTitleContainer}>
-                  <Sparkles size={24} color={colors.accent} strokeWidth={2} />
-                  <Text style={styles.modalTitle}>Create New Habit</Text>
+              <Animated.View
+                style={styles.closeButton}
+                onStartShouldSetResponder={() => true}
+                onResponderRelease={handleCloseModal}
+              >
+                <X size={20} color={colors.textSecondary} strokeWidth={2.5} />
+              </Animated.View>
+
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.modalScrollContent}
+              >
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Create Your Habit</Text>
+                  <Text style={styles.modalSubtitle}>
+                    Choose a category and describe what you want to achieve
+                  </Text>
                 </View>
-                <Animated.View
-                  style={styles.closeButton}
-                  onStartShouldSetResponder={() => true}
-                  onResponderRelease={handleCloseModal}
-                >
-                  <X size={24} color={colors.textTertiary} strokeWidth={2} />
-                </Animated.View>
-              </View>
 
-              <Text style={styles.modalDescription}>
-                Describe the habit you'd like to build. AI will help refine it.
-              </Text>
+                <View style={styles.categoriesContainer}>
+                  <Text style={styles.sectionLabel}>Select Category</Text>
+                  <View style={styles.categoriesGrid}>
+                    {categories.map((category, index) => {
+                      const Icon = category.icon;
+                      const isSelected = selectedCategory === category.id;
 
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.modalInput}
-                  value={newHabitText}
-                  onChangeText={setNewHabitText}
-                  placeholder="e.g., I want to meditate every morning"
-                  placeholderTextColor={colors.textQuaternary}
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                  autoFocus
+                      return (
+                        <Animated.View
+                          key={category.id}
+                          entering={FadeIn.delay(index * 50)}
+                          style={styles.categoryCardWrapper}
+                          onStartShouldSetResponder={() => true}
+                          onResponderRelease={() => {
+                            setSelectedCategory(category.id);
+                            if (Platform.OS !== 'web') {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                          }}
+                        >
+                          <LinearGradient
+                            colors={category.colors}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={[
+                              styles.categoryCard,
+                              isSelected && styles.categoryCardSelected,
+                            ]}
+                          >
+                            {isSelected && (
+                              <View style={styles.categoryCheckmark}>
+                                <Sparkles size={14} color="#FFFFFF" strokeWidth={3} />
+                              </View>
+                            )}
+                            <View style={styles.categoryIconContainer}>
+                              <Icon size={28} color="#FFFFFF" strokeWidth={2} />
+                            </View>
+                            <Text style={styles.categoryName}>{category.name}</Text>
+                          </LinearGradient>
+                        </Animated.View>
+                      );
+                    })}
+                  </View>
+                </View>
+
+                <View style={styles.inputSection}>
+                  <Text style={styles.sectionLabel}>Describe Your Habit</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.habitInput}
+                      value={newHabitText}
+                      onChangeText={setNewHabitText}
+                      placeholder="e.g., Meditate for 10 minutes every morning"
+                      placeholderTextColor={colors.textQuaternary}
+                      multiline
+                      numberOfLines={3}
+                      textAlignVertical="top"
+                    />
+                  </View>
+                  <Text style={styles.inputHint}>
+                    AI will refine and optimize your habit for success
+                  </Text>
+                </View>
+
+                {error ? (
+                  <Animated.View entering={FadeIn} style={styles.errorContainer}>
+                    <Text style={styles.modalError}>{error}</Text>
+                  </Animated.View>
+                ) : null}
+
+                <Button
+                  title={creating ? "Creating..." : "Create Habit"}
+                  onPress={handleCreateHabit}
+                  loading={creating}
+                  size="large"
+                  style={styles.createButton}
                 />
-              </View>
-
-              {error ? (
-                <Animated.View entering={FadeIn} style={styles.errorContainer}>
-                  <Text style={styles.modalError}>{error}</Text>
-                </Animated.View>
-              ) : null}
-
-              <Button
-                title={creating ? "Creating..." : "Create Habit"}
-                onPress={handleCreateHabit}
-                loading={creating}
-                size="large"
-                style={styles.modalButton}
-              />
+              </ScrollView>
             </KeyboardAvoidingView>
           </Animated.View>
         </BlurView>
@@ -370,82 +442,152 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContentWrapper: {
-    maxHeight: '85%',
+    maxHeight: '92%',
   },
   modalContent: {
-    backgroundColor: colors.cardGray,
+    backgroundColor: colors.darkGray,
     borderTopLeftRadius: borderRadius.xxl,
     borderTopRightRadius: borderRadius.xxl,
-    padding: spacing.xl,
+    paddingTop: spacing.xl,
     paddingBottom: Platform.OS === 'ios' ? spacing.xxxl : spacing.xl,
     ...elevation.large,
   },
   modalHandle: {
-    width: 40,
-    height: 5,
+    width: 36,
+    height: 4,
     backgroundColor: colors.borderGray,
-    borderRadius: borderRadius.xs,
+    borderRadius: borderRadius.full,
     alignSelf: 'center',
-    marginBottom: spacing.xl,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: spacing.base,
   },
-  modalTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  modalTitle: {
-    fontSize: typography.fontSizes.xl,
-    fontWeight: typography.fontWeights.bold,
-    color: colors.textPrimary,
-    letterSpacing: typography.letterSpacing.tight,
-  },
   closeButton: {
-    width: 40,
-    height: 40,
+    position: 'absolute',
+    top: spacing.lg,
+    right: spacing.xl,
+    width: 36,
+    height: 36,
     borderRadius: borderRadius.full,
     backgroundColor: colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
-  modalDescription: {
-    fontSize: typography.fontSizes.sm,
+  modalScrollContent: {
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xl,
+  },
+  modalHeader: {
+    marginBottom: spacing.xxxl,
+    paddingRight: spacing.huge,
+  },
+  modalTitle: {
+    fontSize: typography.fontSizes.xxl,
+    fontWeight: typography.fontWeights.bold,
+    color: colors.textPrimary,
+    letterSpacing: typography.letterSpacing.tight,
+    marginBottom: spacing.sm,
+  },
+  modalSubtitle: {
+    fontSize: typography.fontSizes.md,
     color: colors.textTertiary,
-    marginBottom: spacing.xl,
-    lineHeight: typography.fontSizes.sm * typography.lineHeights.relaxed,
+    lineHeight: typography.fontSizes.md * typography.lineHeights.body,
+    fontWeight: typography.fontWeights.regular,
   },
-  inputContainer: {
+  sectionLabel: {
+    fontSize: typography.fontSizes.xs,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.wider,
     marginBottom: spacing.base,
   },
-  modalInput: {
-    backgroundColor: colors.lightGray,
+  categoriesContainer: {
+    marginBottom: spacing.xxxl,
+  },
+  categoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -spacing.xs,
+  },
+  categoryCardWrapper: {
+    width: '33.33%',
+    padding: spacing.xs,
+  },
+  categoryCard: {
+    aspectRatio: 1,
+    borderRadius: borderRadius.lg,
+    padding: spacing.base,
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+    ...elevation.medium,
+  },
+  categoryCardSelected: {
+    transform: [{ scale: 0.95 }],
+    ...elevation.colored,
+  },
+  categoryCheckmark: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 24,
+    height: 24,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categoryIconContainer: {
+    width: 48,
+    height: 48,
     borderRadius: borderRadius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categoryName: {
+    fontSize: typography.fontSizes.sm,
+    fontWeight: typography.fontWeights.semibold,
+    color: '#FFFFFF',
+    letterSpacing: typography.letterSpacing.tight,
+  },
+  inputSection: {
+    marginBottom: spacing.xl,
+  },
+  inputWrapper: {
+    backgroundColor: colors.cardGray,
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    borderColor: colors.borderGray,
+    overflow: 'hidden',
+  },
+  habitInput: {
     padding: spacing.base,
     fontSize: typography.fontSizes.md,
     color: colors.textPrimary,
-    borderWidth: 1.5,
-    borderColor: colors.borderGray,
-    minHeight: 120,
-    lineHeight: typography.fontSizes.md * typography.lineHeights.relaxed,
+    minHeight: 100,
+    lineHeight: typography.fontSizes.md * typography.lineHeights.body,
     fontWeight: typography.fontWeights.regular,
+  },
+  inputHint: {
+    fontSize: typography.fontSizes.xs,
+    color: colors.textQuaternary,
+    marginTop: spacing.sm,
+    fontStyle: 'italic',
   },
   errorContainer: {
     backgroundColor: colors.errorDark,
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    padding: spacing.base,
     marginBottom: spacing.base,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.error,
   },
   modalError: {
     color: colors.errorLight,
     fontSize: typography.fontSizes.sm,
     fontWeight: typography.fontWeights.medium,
   },
-  modalButton: {
+  createButton: {
     marginTop: spacing.base,
   },
 });
