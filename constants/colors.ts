@@ -1,15 +1,16 @@
 export const colors = {
   black: '#000000',
-  darkGray: '#0A0A0A',
-  mediumGray: '#1C1C1E',
-  lightGray: '#2C2C2E',
-  borderGray: '#38383A',
-  cardGray: '#1C1C1E',
+  darkGray: '#121212',
+  mediumGray: '#1E1E1E',
+  lightGray: '#2A2A2A',
+  borderGray: '#3A3A3A',
+  cardGray: '#1A1A1A',
+  cardLight: '#252525',
 
   textPrimary: '#FFFFFF',
-  textSecondary: '#EBEBF5',
-  textTertiary: '#8E8E93',
-  textQuaternary: '#48484A',
+  textSecondary: '#E8E8E8',
+  textTertiary: '#9E9E9E',
+  textQuaternary: '#5A5A5A',
 
   accent: '#007AFF',
   accentLight: '#0A84FF',
@@ -45,22 +46,45 @@ export const colors = {
   energyGradientStart: '#FF9F0A',
   energyGradientEnd: '#FF453A',
 
+  pinterest: {
+    rose: '#FFB6C1',
+    coral: '#FF7F7F',
+    peach: '#FFD4A3',
+    mint: '#B2E4D5',
+    lavender: '#E6E6FA',
+    sky: '#A8D8EA',
+    sage: '#C7CEAA',
+    blush: '#FFC9D4',
+  },
+
+  gradients: {
+    sunset: ['#FF6B9D', '#FFA07A'],
+    ocean: ['#4FACFE', '#00F2FE'],
+    forest: ['#56CCF2', '#2F80ED'],
+    berry: ['#FA709A', '#FEE140'],
+    dream: ['#A8EDEA', '#FED6E3'],
+    night: ['#667EEA', '#764BA2'],
+    gold: ['#FFD89B', '#FF9A76'],
+    purple: ['#C471F5', '#FA71CD'],
+  },
+
   shadow: {
-    small: 'rgba(0, 0, 0, 0.12)',
-    medium: 'rgba(0, 0, 0, 0.16)',
-    large: 'rgba(0, 0, 0, 0.24)',
-    colored: 'rgba(0, 122, 255, 0.3)',
+    small: 'rgba(0, 0, 0, 0.15)',
+    medium: 'rgba(0, 0, 0, 0.2)',
+    large: 'rgba(0, 0, 0, 0.3)',
+    colored: 'rgba(0, 122, 255, 0.35)',
   },
 
   overlay: {
-    light: 'rgba(0, 0, 0, 0.4)',
-    medium: 'rgba(0, 0, 0, 0.6)',
-    heavy: 'rgba(0, 0, 0, 0.85)',
+    light: 'rgba(0, 0, 0, 0.3)',
+    medium: 'rgba(0, 0, 0, 0.5)',
+    heavy: 'rgba(0, 0, 0, 0.75)',
+    gradient: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%)',
   },
 
   glass: {
-    background: 'rgba(28, 28, 30, 0.72)',
-    border: 'rgba(255, 255, 255, 0.08)',
+    background: 'rgba(26, 26, 26, 0.85)',
+    border: 'rgba(255, 255, 255, 0.1)',
   },
 
   separator: 'rgba(84, 84, 88, 0.65)',

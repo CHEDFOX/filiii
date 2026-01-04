@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Play, Pause, RotateCw } from 'lucide-react-native';
-import { colors, borderRadius, spacing, typography } from '@/constants/colors';
+import { colors, borderRadius, spacing, typography, elevation } from '@/constants/colors';
 import type { SoundFrequency } from '@/types';
 import { WaveformAnimation } from './WaveformAnimation';
 
@@ -19,108 +20,156 @@ export function SoundCard({
   onPlayPause,
   onToggleLoop,
 }: SoundCardProps) {
-  const getCategoryColor = (category: string) => {
+  const getCategoryGradient = (category: string) => {
     switch (category) {
       case 'focus':
-        return colors.focus;
+        return colors.gradients.forest;
       case 'calm':
-        return colors.calm;
+        return colors.gradients.ocean;
       case 'sleep':
-        return colors.sleep;
+        return colors.gradients.night;
       case 'energy':
-        return colors.energy;
+        return colors.gradients.gold;
       default:
-        return colors.accent;
+        return colors.gradients.purple;
     }
   };
 
-  const categoryColor = getCategoryColor(sound.category);
+  const gradient = getCategoryGradient(sound.category);
 
   return (
-    <View style={[styles.card, { borderLeftColor: categoryColor, borderLeftWidth: 4 }]}>
-      <View style={styles.header}>
-        <View style={styles.info}>
-          <Text style={styles.name}>{sound.name}</Text>
-          <Text style={styles.category}>{sound.category.toUpperCase()}</Text>
+    <TouchableOpacity activeOpacity={0.9} style={styles.cardWrapper}>
+      <LinearGradient
+        colors={gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.card}
+      >
+        <View style={styles.gradientOverlay} />
+
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>{sound.category}</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.loopButton, isLooping && styles.loopButtonActive]}
+              onPress={onToggleLoop}
+            >
+              <RotateCw
+                size={16}
+                color="#FFFFFF"
+                strokeWidth={isLooping ? 3 : 2}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.mainContent}>
+            <Text style={styles.name} numberOfLines={2}>
+              {sound.name}
+            </Text>
+
+            <View style={styles.waveformContainer}>
+              <WaveformAnimation isPlaying={isPlaying} color="rgba(255, 255, 255, 0.8)" />
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.playButton} onPress={onPlayPause}>
+            <View style={styles.playButtonInner}>
+              {isPlaying ? (
+                <Pause size={20} color="#FFFFFF" fill="#FFFFFF" />
+              ) : (
+                <Play size={20} color="#FFFFFF" fill="#FFFFFF" />
+              )}
+            </View>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.loopButton, isLooping && styles.loopButtonActive]}
-          onPress={onToggleLoop}
-        >
-          <RotateCw size={20} color={isLooping ? colors.accent : colors.textSecondary} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.waveformContainer}>
-        <WaveformAnimation isPlaying={isPlaying} color={categoryColor} />
-      </View>
-
-      <TouchableOpacity style={styles.playButton} onPress={onPlayPause}>
-        {isPlaying ? (
-          <Pause size={28} color={colors.textPrimary} fill={colors.textPrimary} />
-        ) : (
-          <Play size={28} color={colors.textPrimary} fill={colors.textPrimary} />
-        )}
-      </TouchableOpacity>
-    </View>
+      </LinearGradient>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
+  cardWrapper: {
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+    ...elevation.medium,
+  },
   card: {
-    backgroundColor: colors.mediumGray,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: borderRadius.xl,
+    aspectRatio: 0.85,
+    overflow: 'hidden',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+  },
+  content: {
+    flex: 1,
+    padding: spacing.base,
+    justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
   },
-  info: {
-    flex: 1,
+  categoryBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
-  name: {
-    fontSize: typography.fontSizes.lg,
-    fontWeight: typography.fontWeights.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  category: {
-    fontSize: typography.fontSizes.xs,
-    color: colors.textSecondary,
-    fontWeight: typography.fontWeights.medium,
+  categoryText: {
+    fontSize: typography.fontSizes.xxs,
+    fontWeight: typography.fontWeights.semibold,
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.wider,
   },
   loopButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.lightGray,
+    width: 32,
+    height: 32,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   loopButtonActive: {
-    backgroundColor: colors.accent + '30',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  mainContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  name: {
+    fontSize: typography.fontSizes.lg,
+    fontWeight: typography.fontWeights.bold,
+    color: '#FFFFFF',
+    marginBottom: spacing.md,
+    letterSpacing: typography.letterSpacing.tight,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   waveformContainer: {
-    height: 60,
-    marginVertical: spacing.md,
+    height: 50,
   },
   playButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.accent,
+    alignSelf: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: spacing.sm,
+  },
+  playButtonInner: {
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

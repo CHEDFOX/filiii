@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Audio } from 'expo-av';
+import { Sparkles } from 'lucide-react-native';
 import { SoundCard } from '@/components/frequencies/SoundCard';
-import { colors, spacing, typography } from '@/constants/colors';
+import { colors, spacing, typography, borderRadius } from '@/constants/colors';
 import { SOUND_FREQUENCIES } from '@/constants/sounds';
 
 export default function FrequenciesScreen() {
@@ -62,30 +64,37 @@ export default function FrequenciesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Sound Space</Text>
-        <Text style={styles.subtitle}>Find your perfect frequency</Text>
+        <View style={styles.titleContainer}>
+          <Sparkles size={28} color={colors.accent} strokeWidth={2} />
+          <View style={styles.titleTextContainer}>
+            <Text style={styles.title}>Sound Library</Text>
+            <Text style={styles.subtitle}>Discover healing frequencies</Text>
+          </View>
+        </View>
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {categories.map((category) => {
-          const categorySounds = SOUND_FREQUENCIES.filter((s) => s.category === category);
-
-          return (
-            <View key={category} style={styles.categorySection}>
-              <Text style={styles.categoryTitle}>{category.toUpperCase()}</Text>
-              {categorySounds.map((soundItem) => (
-                <SoundCard
-                  key={soundItem.id}
-                  sound={soundItem}
-                  isPlaying={currentSound === soundItem.id}
-                  isLooping={loopingSound === soundItem.id}
-                  onPlayPause={() => handlePlayPause(soundItem.id, soundItem.url)}
-                  onToggleLoop={() => handleToggleLoop(soundItem.id)}
-                />
-              ))}
-            </View>
-          );
-        })}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.gridContainer}>
+          {SOUND_FREQUENCIES.map((soundItem, index) => (
+            <Animated.View
+              key={soundItem.id}
+              entering={FadeIn.delay(index * 50)}
+              style={styles.gridItem}
+            >
+              <SoundCard
+                sound={soundItem}
+                isPlaying={currentSound === soundItem.id}
+                isLooping={loopingSound === soundItem.id}
+                onPlayPause={() => handlePlayPause(soundItem.id, soundItem.url)}
+                onToggleLoop={() => handleToggleLoop(soundItem.id)}
+              />
+            </Animated.View>
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -94,38 +103,45 @@ export default function FrequenciesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.black,
+    backgroundColor: colors.darkGray,
   },
   header: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderGray,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  titleTextContainer: {
+    flex: 1,
   },
   title: {
-    fontSize: typography.fontSizes.xl,
+    fontSize: typography.fontSizes.xxl,
     fontWeight: typography.fontWeights.bold,
     color: colors.textPrimary,
+    letterSpacing: typography.letterSpacing.tight,
   },
   subtitle: {
     fontSize: typography.fontSizes.sm,
-    color: colors.textSecondary,
+    color: colors.textTertiary,
     marginTop: spacing.xs,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: spacing.lg,
+    padding: spacing.base,
+    paddingBottom: spacing.massive,
   },
-  categorySection: {
-    marginBottom: spacing.xl,
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -spacing.xs,
   },
-  categoryTitle: {
-    fontSize: typography.fontSizes.sm,
-    fontWeight: typography.fontWeights.bold,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-    letterSpacing: 1,
+  gridItem: {
+    width: '50%',
+    padding: spacing.xs,
   },
 });

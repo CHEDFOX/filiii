@@ -25,30 +25,26 @@ export function HabitCard({ habit, onComplete, isCompleted }: HabitCardProps) {
 
   const getCategoryColors = (category: string) => {
     switch (category) {
+      case 'wellness':
+        return colors.gradients.sunset;
+      case 'fitness':
+        return colors.gradients.ocean;
+      case 'learning':
+        return colors.gradients.berry;
+      case 'productivity':
+        return colors.gradients.dream;
+      case 'mindfulness':
+        return colors.gradients.gold;
+      case 'sleep':
+        return colors.gradients.night;
       case 'physical':
-        return {
-          color: colors.energy,
-          gradientStart: colors.energyGradientStart,
-          gradientEnd: colors.energyGradientEnd,
-        };
+        return colors.gradients.sunset;
       case 'mental':
-        return {
-          color: colors.calm,
-          gradientStart: colors.calmGradientStart,
-          gradientEnd: colors.calmGradientEnd,
-        };
+        return colors.gradients.forest;
       case 'hybrid':
-        return {
-          color: colors.focus,
-          gradientStart: colors.focusGradientStart,
-          gradientEnd: colors.focusGradientEnd,
-        };
+        return colors.gradients.purple;
       default:
-        return {
-          color: colors.accent,
-          gradientStart: colors.accentGradientStart,
-          gradientEnd: colors.accentGradientEnd,
-        };
+        return colors.gradients.ocean;
     }
   };
 
@@ -93,170 +89,158 @@ export function HabitCard({ habit, onComplete, isCompleted }: HabitCardProps) {
 
   return (
     <Animated.View
-      style={[
-        styles.card,
-        isCompleted && styles.completedCard,
-        elevation.small,
-        animatedStyle,
-      ]}
+      style={[styles.cardWrapper, elevation.medium, animatedStyle]}
+      onTouchStart={handlePressIn}
+      onTouchEnd={handlePressOut}
+      onTouchCancel={handlePressOut}
     >
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <LinearGradient
-            colors={[categoryColors.gradientStart, categoryColors.gradientEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.categoryIndicator}
-          />
-          <View style={styles.textContent}>
-            <Text style={styles.name}>{habit.name}</Text>
+      <LinearGradient
+        colors={categoryColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.card}
+      >
+        <View style={styles.gradientOverlay} />
+
+        <View style={styles.content}>
+          {isCompleted && (
+            <View style={styles.completedBadge}>
+              <Check size={16} color="#FFFFFF" strokeWidth={3} />
+              <Text style={styles.completedText}>Completed</Text>
+            </View>
+          )}
+
+          <View style={styles.textSection}>
+            <Text style={styles.name} numberOfLines={2}>
+              {habit.name}
+            </Text>
             <Text style={styles.description} numberOfLines={2}>
               {habit.description}
             </Text>
           </View>
-        </View>
-        {isCompleted && (
-          <View style={[styles.checkIcon, styles.checkIconBackground]}>
-            <Check size={20} color={colors.textPrimary} strokeWidth={3} />
-          </View>
-        )}
-      </View>
 
-      <View style={styles.footer}>
-        <View style={styles.meta}>
-          <View style={styles.metaBadge}>
-            <Text style={styles.metaText}>{habit.duration} min</Text>
-          </View>
-          <View style={styles.metaBadge}>
-            <Text style={styles.metaText}>{habit.frequency}</Text>
+          <View style={styles.footer}>
+            <View style={styles.meta}>
+              <View style={styles.metaBadge}>
+                <Text style={styles.metaText}>{habit.duration} min</Text>
+              </View>
+              <View style={styles.metaBadge}>
+                <Text style={styles.metaText}>{habit.frequency}</Text>
+              </View>
+            </View>
+            {!isCompleted && (
+              <Animated.View
+                style={styles.startButton}
+                onStartShouldSetResponder={() => true}
+                onResponderRelease={handleStart}
+              >
+                <View style={styles.startButtonInner}>
+                  <Play size={14} color="#FFFFFF" fill="#FFFFFF" />
+                </View>
+              </Animated.View>
+            )}
           </View>
         </View>
-        {!isCompleted && (
-          <Animated.View
-            style={styles.startButtonWrapper}
-            onTouchStart={handlePressIn}
-            onTouchEnd={handlePressOut}
-            onTouchCancel={handlePressOut}
-          >
-            <Animated.View
-              style={styles.startButton}
-              onStartShouldSetResponder={() => true}
-              onResponderRelease={handleStart}
-            >
-              <LinearGradient
-                colors={[colors.accentGradientStart, colors.accentGradientEnd]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.startGradient}
-              >
-                <Play size={16} color={colors.textPrimary} fill={colors.textPrimary} />
-                <Text style={styles.startText}>Start</Text>
-              </LinearGradient>
-            </Animated.View>
-          </Animated.View>
-        )}
-      </View>
+      </LinearGradient>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.cardGray,
-    borderRadius: borderRadius.lg,
-    padding: spacing.base,
+  cardWrapper: {
+    borderRadius: borderRadius.xl,
     marginBottom: spacing.base,
-    borderWidth: 1,
-    borderColor: colors.borderGray,
+    overflow: 'hidden',
   },
-  completedCard: {
-    opacity: 0.65,
-    borderWidth: 1.5,
-    borderColor: colors.success,
+  card: {
+    borderRadius: borderRadius.xl,
+    minHeight: 180,
+    overflow: 'hidden',
   },
-  header: {
-    flexDirection: 'row',
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+  },
+  content: {
+    flex: 1,
+    padding: spacing.lg,
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.md,
   },
-  titleContainer: {
+  completedBadge: {
     flexDirection: 'row',
-    flex: 1,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    gap: spacing.xs,
+    marginBottom: spacing.base,
   },
-  categoryIndicator: {
-    width: 4,
-    borderRadius: borderRadius.xs,
-    marginRight: spacing.md,
-    alignSelf: 'stretch',
+  completedText: {
+    fontSize: typography.fontSizes.xs,
+    fontWeight: typography.fontWeights.semibold,
+    color: '#FFFFFF',
+    letterSpacing: typography.letterSpacing.wide,
   },
-  textContent: {
+  textSection: {
     flex: 1,
+    justifyContent: 'center',
   },
   name: {
-    fontSize: typography.fontSizes.lg,
-    fontWeight: typography.fontWeights.semibold,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold,
+    color: '#FFFFFF',
+    marginBottom: spacing.sm,
     letterSpacing: typography.letterSpacing.tight,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   description: {
     fontSize: typography.fontSizes.sm,
-    color: colors.textTertiary,
-    lineHeight: typography.fontSizes.sm * typography.lineHeights.relaxed,
-  },
-  checkIcon: {
-    marginLeft: spacing.md,
-  },
-  checkIconBackground: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.success,
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: typography.fontSizes.sm * typography.lineHeights.body,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: spacing.base,
   },
   meta: {
     flexDirection: 'row',
     gap: spacing.sm,
   },
   metaBadge: {
-    backgroundColor: colors.lightGray,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.full,
   },
   metaText: {
     fontSize: typography.fontSizes.xs,
-    fontWeight: typography.fontWeights.medium,
-    color: colors.textTertiary,
+    fontWeight: typography.fontWeights.semibold,
+    color: '#FFFFFF',
     letterSpacing: typography.letterSpacing.wide,
-  },
-  startButtonWrapper: {
-    overflow: 'hidden',
-    borderRadius: borderRadius.md,
   },
   startButton: {
-    overflow: 'hidden',
-    borderRadius: borderRadius.md,
-    minHeight: 36,
-  },
-  startGradient: {
-    flexDirection: 'row',
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
-    gap: spacing.xs,
   },
-  startText: {
-    fontSize: typography.fontSizes.sm,
-    fontWeight: typography.fontWeights.semibold,
-    color: colors.textPrimary,
-    letterSpacing: typography.letterSpacing.wide,
+  startButtonInner: {
+    width: 36,
+    height: 36,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

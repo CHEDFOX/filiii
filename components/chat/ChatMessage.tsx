@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, borderRadius, spacing, typography } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, borderRadius, spacing, typography, elevation } from '@/constants/colors';
 import type { ChatMessage as ChatMessageType } from '@/types';
 
 interface ChatMessageProps {
@@ -11,25 +12,42 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.assistantContainer]}>
-      <View style={[styles.bubble, isUser ? styles.userBubble : styles.assistantBubble]}>
-        <Text style={[styles.text, isUser ? styles.userText : styles.assistantText]}>
-          {message.content}
-        </Text>
-        <Text style={styles.timestamp}>
-          {new Date(message.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </Text>
-      </View>
+      {isUser ? (
+        <View style={[styles.bubble, styles.userBubbleWrapper, elevation.small]}>
+          <LinearGradient
+            colors={colors.gradients.ocean}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.userBubble}
+          >
+            <Text style={styles.userText}>{message.content}</Text>
+            <Text style={styles.userTimestamp}>
+              {new Date(message.timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Text>
+          </LinearGradient>
+        </View>
+      ) : (
+        <View style={[styles.bubble, styles.assistantBubble, elevation.small]}>
+          <Text style={styles.assistantText}>{message.content}</Text>
+          <Text style={styles.assistantTimestamp}>
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.md,
+    marginBottom: spacing.base,
+    paddingHorizontal: spacing.base,
   },
   userContainer: {
     alignItems: 'flex-end',
@@ -38,33 +56,50 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   bubble: {
-    maxWidth: '80%',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.lg,
+    maxWidth: '85%',
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
+  },
+  userBubbleWrapper: {
+    borderRadius: borderRadius.xl,
   },
   userBubble: {
-    backgroundColor: colors.accent,
-    borderBottomRightRadius: 4,
+    paddingVertical: spacing.base,
+    paddingHorizontal: spacing.base,
+    borderRadius: borderRadius.xl,
   },
   assistantBubble: {
-    backgroundColor: colors.mediumGray,
-    borderBottomLeftRadius: 4,
-  },
-  text: {
-    fontSize: typography.fontSizes.md,
-    lineHeight: typography.fontSizes.md * typography.lineHeights.body,
-    marginBottom: spacing.xs,
+    backgroundColor: colors.cardGray,
+    paddingVertical: spacing.base,
+    paddingHorizontal: spacing.base,
+    borderWidth: 1,
+    borderColor: colors.borderGray,
   },
   userText: {
-    color: colors.textPrimary,
+    fontSize: typography.fontSizes.md,
+    lineHeight: typography.fontSizes.md * typography.lineHeights.body,
+    color: '#FFFFFF',
+    marginBottom: spacing.xs,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   assistantText: {
+    fontSize: typography.fontSizes.md,
+    lineHeight: typography.fontSizes.md * typography.lineHeights.body,
     color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
-  timestamp: {
-    fontSize: typography.fontSizes.xs,
-    color: colors.textTertiary,
+  userTimestamp: {
+    fontSize: typography.fontSizes.xxs,
+    color: 'rgba(255, 255, 255, 0.8)',
     alignSelf: 'flex-end',
+    fontWeight: typography.fontWeights.medium,
+  },
+  assistantTimestamp: {
+    fontSize: typography.fontSizes.xxs,
+    color: colors.textQuaternary,
+    alignSelf: 'flex-end',
+    fontWeight: typography.fontWeights.medium,
   },
 });
