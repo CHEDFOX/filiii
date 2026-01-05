@@ -1,4 +1,4 @@
-# filiii 🧠💪
+# fili
 
 **Your personal AI-powered habit coach**
 
