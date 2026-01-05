@@ -99,6 +99,16 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+  name="checkin"
+  options={{
+    title: 'Check-In',
+    tabBarIcon: ({ color, focused }) => (
+      <Ionicons name={focused ? 'sunny' : 'sunny-outline'} size={28} color={color} />
+    ),
+    headerShown: false, // Optional: hide header if you want full-screen feel
+  }}
+/>
     </Tabs>
   );
 }
