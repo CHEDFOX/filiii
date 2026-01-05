@@ -1,93 +1,14 @@
-export const colors = {
-  black: '#000000',
-  darkGray: '#121212',
-  mediumGray: '#1E1E1E',
-  lightGray: '#2A2A2A',
-  borderGray: '#3A3A3A',
-  cardGray: '#1A1A1A',
-  cardLight: '#252525',
-
+export const Colors = {
+  background: '#0F0F1A',        // Deep dark for sunset night
+  cardBackground: 'rgba(30, 20, 40, 0.65)', // Frosted glass effect
+  sunsetPrimary: '#FF6B6B',      // Warm coral
+  sunsetSecondary: '#FFA06B',    // Peach orange
+  sunsetAccent: '#D48FF9',       // Soft lavender purple
+  sunsetGlow: '#FF9F9F',        // Gentle pink
   textPrimary: '#FFFFFF',
-  textSecondary: '#E8E8E8',
-  textTertiary: '#9E9E9E',
-  textQuaternary: '#5A5A5A',
-
-  accent: '#007AFF',
-  accentLight: '#0A84FF',
-  accentDark: '#0051D5',
-  accentGradientStart: '#007AFF',
-  accentGradientEnd: '#00C7BE',
-
-  success: '#34C759',
-  successLight: '#30D158',
-  successDark: '#248A3D',
-
-  warning: '#FF9F0A',
-  warningLight: '#FFD60A',
-  warningDark: '#FF6B00',
-
-  error: '#FF3B30',
-  errorLight: '#FF453A',
-  errorDark: '#D70015',
-
-  focus: '#5AC8FA',
-  focusGradientStart: '#5AC8FA',
-  focusGradientEnd: '#007AFF',
-
-  calm: '#32D74B',
-  calmGradientStart: '#32D74B',
-  calmGradientEnd: '#30B0C7',
-
-  sleep: '#BF5AF2',
-  sleepGradientStart: '#BF5AF2',
-  sleepGradientEnd: '#5856D6',
-
-  energy: '#FF9F0A',
-  energyGradientStart: '#FF9F0A',
-  energyGradientEnd: '#FF453A',
-
-  pinterest: {
-    rose: '#FFB6C1',
-    coral: '#FF7F7F',
-    peach: '#FFD4A3',
-    mint: '#B2E4D5',
-    lavender: '#E6E6FA',
-    sky: '#A8D8EA',
-    sage: '#C7CEAA',
-    blush: '#FFC9D4',
-  },
-
-  gradients: {
-    sunset: ['#FF6B9D', '#FFA07A'],
-    ocean: ['#4FACFE', '#00F2FE'],
-    forest: ['#56CCF2', '#2F80ED'],
-    berry: ['#FA709A', '#FEE140'],
-    dream: ['#A8EDEA', '#FED6E3'],
-    night: ['#667EEA', '#764BA2'],
-    gold: ['#FFD89B', '#FF9A76'],
-    purple: ['#C471F5', '#FA71CD'],
-  },
-
-  shadow: {
-    small: 'rgba(0, 0, 0, 0.15)',
-    medium: 'rgba(0, 0, 0, 0.2)',
-    large: 'rgba(0, 0, 0, 0.3)',
-    colored: 'rgba(0, 122, 255, 0.35)',
-  },
-
-  overlay: {
-    light: 'rgba(0, 0, 0, 0.3)',
-    medium: 'rgba(0, 0, 0, 0.5)',
-    heavy: 'rgba(0, 0, 0, 0.75)',
-    gradient: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%)',
-  },
-
-  glass: {
-    background: 'rgba(26, 26, 26, 0.85)',
-    border: 'rgba(255, 255, 255, 0.1)',
-  },
-
-  separator: 'rgba(84, 84, 88, 0.65)',
+  textSecondary: '#E0E0FF',
+  success: '#A8E6CF',           // Soft mint for checkmarks
+  border: 'rgba(255, 255, 255, 0.1)',
 };
 
 export const spacing = {
